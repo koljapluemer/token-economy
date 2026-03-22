@@ -13,14 +13,14 @@ async function saveOnBlur() {
   const trimmedName = name.value.trim()
   if (props.action === null) {
     if (!trimmedName) return
-    await addAction(trimmedName, Math.trunc(tokens.value))
+    await addAction(trimmedName, tokens.value)
     name.value = ''
     tokens.value = 0
   } else {
     if (!trimmedName) return
     await updateAction(props.action.id!, {
       name: trimmedName,
-      tokens: Math.trunc(tokens.value),
+      tokens: tokens.value,
     })
   }
 }
@@ -47,7 +47,7 @@ async function handleDelete() {
       <input
         v-model.number="tokens"
         type="number"
-        step="1"
+        step="any"
         class="input input-sm input-ghost w-full"
         placeholder="0"
         @blur="saveOnBlur"
