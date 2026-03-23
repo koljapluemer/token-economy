@@ -1,3 +1,4 @@
+import Decimal from 'decimal.js'
 import { db, useLiveQuery } from '../../db/db'
 
 export type { LoggedAction } from '../../db/db'
@@ -13,7 +14,7 @@ export function useTokenBalance() {
   return useLiveQuery(
     async () => {
       const all = await db.loggedActions.toArray()
-      return all.reduce((sum, la) => sum + la.tokens, 0)
+      return all.reduce((sum, la) => sum.plus(la.tokens), new Decimal(0)).toNumber()
     },
     0,
   )
