@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { Home, List, ScrollText } from 'lucide-vue-next'
+import { ChartLine, Home, List, ScrollText } from 'lucide-vue-next'
 
 const route = useRoute()
 
@@ -8,6 +8,7 @@ const tabs = [
   { to: '/', icon: Home, label: 'Tokens' },
   { to: '/list', icon: List, label: 'Actions' },
   { to: '/log', icon: ScrollText, label: 'Log' },
+  { to: '/stats', icon: ChartLine, label: 'Stats' },
 ]
 </script>
 
@@ -16,14 +17,31 @@ const tabs = [
     <RouterView />
     <footer class="text-xs text-base-content/40 p-4 flex flex-col gap-1">
       <p>
-        Made by <a class="underline" href="https://koljasam.com/" target="_blank">Kolja Sam</a>.
+        Made by <a
+          class="underline"
+          href="https://koljasam.com/"
+          target="_blank"
+        >Kolja Sam</a>.
         Your data stays on your device.
-        I track page views with <a href="https://www.goatcounter.com/" class="underline" target="_blank">goatcounter</a>, nothing else.
+        I track page views with <a
+          href="https://www.goatcounter.com/"
+          class="underline"
+          target="_blank"
+        >goatcounter</a>, nothing else.
       </p>
       <p>
-        <a href="https://ko-fi.com/S6S81CWUVD" target="_blank" rel="noopener" class="underline">Buy me a coffee</a>
+        <a
+          href="https://ko-fi.com/S6S81CWUVD"
+          target="_blank"
+          rel="noopener"
+          class="underline"
+        >Buy me a coffee</a>
         ·
-        <a href="https://github.com/koljapluemer/token-economy" class="underline" target="_blank">Source</a>
+        <a
+          href="https://github.com/koljapluemer/token-economy"
+          class="underline"
+          target="_blank"
+        >Source</a>
       </p>
     </footer>
   </div>
@@ -34,7 +52,10 @@ const tabs = [
       :to="to"
       :class="{ 'dock-active': route.path === to }"
     >
-      <Component :is="Icon" :size="22" />
+      <Component
+        :is="Icon"
+        :size="22"
+      />
       <span class="dock-label">{{ label }}</span>
     </RouterLink>
   </nav>
