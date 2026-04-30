@@ -15,6 +15,8 @@ const visibleRanges = computed(() => {
 
   return dailyTokenRanges.value.slice(-14)
 })
+
+const chartKey = computed(() => `${rangeMode.value}-${visibleRanges.value.length}`)
 </script>
 
 <template>
@@ -59,7 +61,13 @@ const visibleRanges = computed(() => {
       v-else
       class="rounded-box border border-base-200 bg-base-100 p-4"
     >
-      <DailyBalanceChart :points="visibleRanges" />
+      <div class="mb-3 text-sm opacity-60">
+        Showing {{ visibleRanges.length }} calendar days.
+      </div>
+      <DailyBalanceChart
+        :key="chartKey"
+        :points="visibleRanges"
+      />
     </div>
   </main>
 </template>
