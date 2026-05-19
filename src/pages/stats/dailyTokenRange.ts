@@ -4,6 +4,8 @@ export interface DailyTokenRange {
   dayKey: string
   shortLabel: string
   fullLabel: string
+  openBalance: number
+  closeBalance: number
   minBalance: number
   maxBalance: number
 }
@@ -39,6 +41,7 @@ async function loadDailyTokenRanges() {
 
   for (let day = firstDay; day <= today; day = addDays(day, 1)) {
     const dayKey = toDayKey(day)
+    const openBalance = balance
     let minBalance = balance
     let maxBalance = balance
 
@@ -53,6 +56,8 @@ async function loadDailyTokenRanges() {
       dayKey,
       shortLabel: shortDateFormatter.format(day),
       fullLabel: fullDateFormatter.format(day),
+      openBalance,
+      closeBalance: balance,
       minBalance,
       maxBalance,
     })
