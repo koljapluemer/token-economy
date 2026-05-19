@@ -16,6 +16,7 @@ const actions = useActions()
           <tr>
             <th>Name</th>
             <th>Tokens</th>
+            <th>Daily</th>
             <th />
           </tr>
         </thead>

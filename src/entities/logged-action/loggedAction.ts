@@ -10,6 +10,10 @@ export function useLoggedActions() {
   )
 }
 
+export function useTodayLoggedActions() {
+  return useLiveQuery(loadTodayLoggedActions, [] as import('../../db/db').LoggedAction[])
+}
+
 export function useTokenBalance() {
   return useLiveQuery(
     async () => {
@@ -20,10 +24,41 @@ export function useTokenBalance() {
   )
 }
 
-export async function logAction(actionName: string, tokens: number) {
-  return db.loggedActions.add({ actionName, tokens, timestamp: new Date() })
+export async function logAction(actionId: number | undefined, actionName: string, tokens: number, daily = false) {
+  if (daily && await hasLoggedActionToday(actionId, actionName)) {
+    return false
+  }
+
+  return db.loggedActions.add({ actionId, actionName, tokens, timestamp: new Date() })
 }
 
 export async function deleteLoggedAction(id: number) {
   return db.loggedActions.delete(id)
+}
+
+async function loadTodayLoggedActions() {
+  const todayStart = startOfDay(new Date())
+  const tomorrowStart = new Date(todayStart)
+  tomorrowStart.setDate(todayStart.getDate() + 1)
+
+  return db.loggedActions
+    .where('timestamp')
+    .between(todayStart, tomorrowStart, true, false)
+    .toArray()
+}
+
+async function hasLoggedActionToday(actionId: number | undefined, actionName: string) {
+  const todayLoggedActions = await loadTodayLoggedActions()
+
+  return todayLoggedActions.some((entry) => {
+    if (actionId != null && entry.actionId != null) {
+      return entry.actionId === actionId
+    }
+
+    return entry.actionName === actionName
+  })
+}
+
+function startOfDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 }

@@ -8,20 +8,29 @@ const props = defineProps<{ action: Action | null }>()
 
 const name = ref(props.action?.name ?? '')
 const tokens = ref(props.action?.tokens ?? 0)
+const daily = ref(props.action?.daily ?? false)
 
 async function saveOnBlur() {
   const trimmedName = name.value.trim()
   if (props.action === null) {
     if (!trimmedName) return
-    await addAction(trimmedName, tokens.value)
+    await addAction(trimmedName, tokens.value, daily.value)
     name.value = ''
     tokens.value = 0
+    daily.value = false
   } else {
     if (!trimmedName) return
     await updateAction(props.action.id!, {
       name: trimmedName,
       tokens: tokens.value,
+      daily: daily.value,
     })
+  }
+}
+
+async function handleDailyChange() {
+  if (props.action !== null) {
+    await saveOnBlur()
   }
 }
 
@@ -51,6 +60,14 @@ async function handleDelete() {
         class="input input-sm input-ghost w-full"
         placeholder="0"
         @blur="saveOnBlur"
+      >
+    </td>
+    <td class="w-20 text-center">
+      <input
+        v-model="daily"
+        type="checkbox"
+        class="toggle toggle-sm"
+        @change="handleDailyChange"
       >
     </td>
     <td class="w-10">

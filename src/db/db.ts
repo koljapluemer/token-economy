@@ -5,10 +5,12 @@ export interface Action {
   id?: number
   name: string
   tokens: number
+  daily: boolean
 }
 
 export interface LoggedAction {
   id?: number
+  actionId?: number
   actionName: string
   tokens: number
   timestamp: Date
@@ -24,6 +26,18 @@ class TokenDb extends Dexie {
       actions: '++id',
       loggedActions: '++id,timestamp',
     })
+    this.version(2)
+      .stores({
+        actions: '++id,daily',
+        loggedActions: '++id,timestamp,actionId',
+      })
+      .upgrade(async (tx) => {
+        await tx.table('actions').toCollection().modify((action: Action) => {
+          if (action.daily == null) {
+            action.daily = false
+          }
+        })
+      })
   }
 }
 

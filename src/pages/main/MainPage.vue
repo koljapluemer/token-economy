@@ -1,10 +1,37 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import type { Action } from '../../entities/action/action'
 import { useActions } from '../../entities/action/action'
-import { useTokenBalance } from '../../entities/logged-action/loggedAction'
+import { useTodayLoggedActions, useTokenBalance } from '../../entities/logged-action/loggedAction'
 import ActionButton from './ActionButton.vue'
 
 const actions = useActions()
 const balance = useTokenBalance()
+const todayLoggedActions = useTodayLoggedActions()
+
+const usedDailyActionIds = computed(() => {
+  return new Set(
+    todayLoggedActions.value
+      .map((entry) => entry.actionId)
+      .filter((actionId): actionId is number => actionId != null),
+  )
+})
+
+const usedDailyActionNames = computed(() => {
+  return new Set(todayLoggedActions.value.map((entry) => entry.actionName))
+})
+
+function isActionDisabled(action: Action) {
+  if (!action.daily) {
+    return false
+  }
+
+  if (action.id != null && usedDailyActionIds.value.has(action.id)) {
+    return true
+  }
+
+  return usedDailyActionNames.value.has(action.name)
+}
 </script>
 
 <template>
@@ -35,6 +62,7 @@ const balance = useTokenBalance()
         v-for="action in actions"
         :key="action.id!"
         :action="action"
+        :disabled="isActionDisabled(action)"
       />
     </div>
   </main>

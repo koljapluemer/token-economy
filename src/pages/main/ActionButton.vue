@@ -1,21 +1,39 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { Action } from '../../entities/action/action'
 import { logAction } from '../../entities/logged-action/loggedAction'
 
-const props = defineProps<{ action: Action }>()
+const props = withDefaults(defineProps<{ action: Action; disabled?: boolean }>(), {
+  disabled: false,
+})
 
 const floats = ref<{ id: number; text: string }[]>([])
+const isPending = ref(false)
+const isDisabled = computed(() => props.disabled || isPending.value)
 let nextId = 0
 
 async function handleClick() {
-  await logAction(props.action.name, props.action.tokens)
-  const id = nextId++
-  const text = props.action.tokens > 0 ? `+${props.action.tokens}` : `${props.action.tokens}`
-  floats.value.push({ id, text })
-  setTimeout(() => {
-    floats.value = floats.value.filter((f) => f.id !== id)
-  }, 900)
+  if (isDisabled.value) {
+    return
+  }
+
+  isPending.value = true
+
+  try {
+    const logged = await logAction(props.action.id, props.action.name, props.action.tokens, props.action.daily)
+    if (!logged) {
+      return
+    }
+
+    const id = nextId++
+    const text = props.action.tokens > 0 ? `+${props.action.tokens}` : `${props.action.tokens}`
+    floats.value.push({ id, text })
+    setTimeout(() => {
+      floats.value = floats.value.filter((f) => f.id !== id)
+    }, 900)
+  } finally {
+    isPending.value = false
+  }
 }
 </script>
 
@@ -23,6 +41,7 @@ async function handleClick() {
   <button
     class="btn btn-lg relative flex-col h-auto py-3 gap-0.5 active:scale-95 transition-transform"
     :class="action.tokens >= 0 ? 'btn-success' : 'btn-error'"
+    :disabled="isDisabled"
     @click="handleClick"
   >
     <span class="font-semibold text-sm leading-tight max-w-full truncate">{{ action.name }}</span>
