@@ -1,4 +1,5 @@
 import Decimal from 'decimal.js'
+import { computed, onUnmounted, ref } from 'vue'
 import { db, useLiveQuery } from '../../db/db'
 
 export type { LoggedAction } from '../../db/db'
@@ -11,7 +12,12 @@ export function useLoggedActions() {
 }
 
 export function useTodayLoggedActions() {
-  return useLiveQuery(loadTodayLoggedActions, [] as import('../../db/db').LoggedAction[])
+  const loggedActions = useLoggedActions()
+  const currentDayKey = useCurrentDayKey()
+
+  return computed(() => {
+    return loggedActions.value.filter((entry) => toDayKey(entry.timestamp) === currentDayKey.value)
+  })
 }
 
 export function useTokenBalance() {
@@ -61,4 +67,33 @@ async function hasLoggedActionToday(actionId: number | undefined, actionName: st
 
 function startOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+}
+
+function toDayKey(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function useCurrentDayKey() {
+  const currentDayKey = ref(toDayKey(new Date()))
+
+  const sync = () => {
+    currentDayKey.value = toDayKey(new Date())
+  }
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('focus', sync)
+    document.addEventListener('visibilitychange', sync)
+  }
+
+  onUnmounted(() => {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('focus', sync)
+      document.removeEventListener('visibilitychange', sync)
+    }
+  })
+
+  return currentDayKey
 }
